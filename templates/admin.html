@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expresso — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --espresso:#1a0a00; --dark-roast:#2d1200; --medium-roast:#5c2d0a;
+  --crema:#e8c87a; --milk-foam:#fff8f0; --gold:#d4a843; --steam:#f5e6ce;
+  --red:#e84343; --blue:#4361ee; --yellow:#f4a261; --green:#2dc653;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--espresso); font-family:'DM Sans',sans-serif; min-height:100vh; color:var(--milk-foam); }
+.bg { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse 70% 50% at 20% 20%, rgba(92,45,10,0.4) 0%, transparent 60%); }
+
+.top-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1rem 2rem; background:rgba(45,18,0,0.7); backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(232,200,122,0.15); position:sticky; top:0; z-index:100;
+}
+.brand-sm { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:900; background:linear-gradient(135deg,var(--crema),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.back-btn { background:rgba(255,248,240,0.08); border:1px solid rgba(232,200,122,0.2); color:var(--crema); border-radius:10px; padding:0.5rem 1rem; cursor:pointer; font-size:0.85rem; text-decoration:none; transition:all 0.2s; }
+.back-btn:hover { background:rgba(232,200,122,0.15); }
+
+.container { max-width:1100px; margin:0 auto; padding:2rem; position:relative; z-index:2; }
+
+.page-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; color:var(--crema); margin-bottom:0.3rem; }
+.page-sub { color:rgba(255,248,240,0.5); font-size:0.9rem; margin-bottom:2rem; }
+
+.glass { background:rgba(255,248,240,0.04); border:1px solid rgba(232,200,122,0.15); border-radius:20px; padding:1.8rem; margin-bottom:2rem; backdrop-filter:blur(8px); }
+.section-title { font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--crema); margin-bottom:1.2rem; }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:600px){ .form-grid { grid-template-columns:1fr; } }
+.form-full { grid-column:1/-1; }
+.field { display:flex; flex-direction:column; gap:0.35rem; }
+.field label { font-size:0.78rem; font-weight:600; color:rgba(232,200,122,0.7); text-transform:uppercase; letter-spacing:1px; }
+.field input, .field select {
+  background:rgba(255,248,240,0.06); border:1px solid rgba(232,200,122,0.2);
+  border-radius:10px; padding:0.7rem 0.9rem; font-family:'DM Sans',sans-serif;
+  font-size:0.9rem; color:var(--milk-foam); outline:none; transition:all 0.2s;
+}
+.field input:focus, .field select:focus { border-color:var(--gold); background:rgba(255,248,240,0.09); box-shadow:0 0 0 2px rgba(212,168,67,0.15); }
+.field input::placeholder { color:rgba(255,248,240,0.25); }
+.field select option { background:var(--dark-roast); color:var(--milk-foam); }
+
+.correct-group { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.correct-opt {
+  flex:1; min-width:70px; padding:0.6rem 0.5rem; border-radius:10px; border:2px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.05); color:var(--milk-foam); font-family:'DM Sans',sans-serif;
+  font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; text-align:center;
+}
+.correct-opt.active-A { background:rgba(228,67,67,0.25); border-color:#e84343; color:#f9a0a0; }
+.correct-opt.active-B { background:rgba(67,97,238,0.25); border-color:#4361ee; color:#a0b4ff; }
+.correct-opt.active-C { background:rgba(244,162,97,0.25); border-color:#f4a261; color:#ffd0a0; }
+.correct-opt.active-D { background:rgba(45,198,83,0.25); border-color:#2dc653; color:#a0f0b4; }
+
+.btn-add {
+  background:linear-gradient(135deg,var(--gold),var(--crema)); color:var(--espresso);
+  border:none; border-radius:12px; padding:0.8rem 1.8rem;
+  font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:700;
+  cursor:pointer; transition:all 0.2s; margin-top:1rem;
+}
+.btn-add:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,168,67,0.4); }
+.btn-add:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+
+/* Questions Table */
+.q-table { width:100%; border-collapse:collapse; }
+.q-table th {
+  text-align:left; font-size:0.75rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:1px; color:rgba(232,200,122,0.6); padding:0.6rem 0.8rem;
+  border-bottom:1px solid rgba(232,200,122,0.15);
+}
+.q-table td { padding:0.8rem; border-bottom:1px solid rgba(255,248,240,0.05); vertical-align:top; }
+.q-table tr:hover td { background:rgba(255,248,240,0.03); }
+.q-text-cell { font-size:0.88rem; color:var(--steam); max-width:300px; }
+.q-answer-cell { font-size:0.85rem; font-weight:700; }
+.q-answer-cell.A { color:#f9a0a0; } .q-answer-cell.B { color:#a0b4ff; }
+.q-answer-cell.C { color:#ffd0a0; } .q-answer-cell.D { color:#a0f0b4; }
+.cat-badge { background:rgba(212,168,67,0.12); border:1px solid rgba(212,168,67,0.3); color:var(--gold); border-radius:20px; padding:0.15rem 0.6rem; font-size:0.7rem; font-weight:600; white-space:nowrap; }
+.action-btns { display:flex; gap:0.4rem; }
+.btn-edit, .btn-del {
+  border-radius:8px; padding:0.35rem 0.7rem; font-size:0.78rem; font-weight:600;
+  cursor:pointer; border:1px solid; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.btn-edit { background:rgba(67,97,238,0.12); border-color:rgba(67,97,238,0.3); color:#a0b4ff; }
+.btn-edit:hover { background:rgba(67,97,238,0.25); }
+.btn-del { background:rgba(228,67,67,0.12); border-color:rgba(228,67,67,0.3); color:#f9a0a0; }
+.btn-del:hover { background:rgba(228,67,67,0.25); }
+
+.toast {
+  position:fixed; bottom:2rem; left:50%; transform:translateX(-50%);
+  background:rgba(45,18,0,0.9); border:1px solid var(--gold); border-radius:12px;
+  padding:0.8rem 1.5rem; font-size:0.9rem; color:var(--crema); backdrop-filter:blur(10px);
+  opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:999;
+}
+.toast.show { opacity:1; }
+
+.filter-row { display:flex; gap:0.75rem; margin-bottom:1.2rem; flex-wrap:wrap; align-items:center; }
+.filter-btn {
+  background:rgba(255,248,240,0.06); border:1px solid rgba(232,200,122,0.18);
+  color:rgba(255,248,240,0.6); border-radius:20px; padding:0.3rem 0.9rem;
+  font-size:0.8rem; cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif;
+}
+.filter-btn.active { background:rgba(212,168,67,0.2); border-color:var(--gold); color:var(--gold); }
+.q-count { margin-left:auto; font-size:0.85rem; color:rgba(255,248,240,0.4); }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="top-bar">
+  <a href="/" class="back-btn">← Back</a>
+  <span class="brand-sm">☕ Expresso</span>
+  <span style="font-size:0.8rem;color:rgba(255,248,240,0.4)">Admin Panel</span>
+</div>
+
+<div class="container">
+  <h2 class="page-title">Question Manager</h2>
+  <p class="page-sub">Add, edit and organise your quiz questions</p>
+
+  <!-- ADD FORM -->
+  <div class="glass">
+    <div class="section-title" id="form-title">➕ Add New Question</div>
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Question</label>
+        <input id="f-question" placeholder="Enter the question…">
+      </div>
+      <div class="field">
+        <label>🔴 Option A</label>
+        <input id="f-a" placeholder="Option A">
+      </div>
+      <div class="field">
+        <label>🔵 Option B</label>
+        <input id="f-b" placeholder="Option B">
+      </div>
+      <div class="field">
+        <label>🟠 Option C</label>
+        <input id="f-c" placeholder="Option C">
+      </div>
+      <div class="field">
+        <label>🟢 Option D</label>
+        <input id="f-d" placeholder="Option D">
+      </div>
+      <div class="field">
+        <label>Correct Answer</label>
+        <div class="correct-group">
+          <button class="correct-opt" onclick="setCorrect('A')" id="co-A">A</button>
+          <button class="correct-opt" onclick="setCorrect('B')" id="co-B">B</button>
+          <button class="correct-opt" onclick="setCorrect('C')" id="co-C">C</button>
+          <button class="correct-opt" onclick="setCorrect('D')" id="co-D">D</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="f-cat">
+          <option value="Bible">Bible</option>
+          <option value="Culture">Culture</option>
+          <option value="Poland">Poland</option>
+          <option value="General">General</option>
+          <option value="Science">Science</option>
+          <option value="History">History</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn-add" id="submit-btn" onclick="submitQuestion()">☕ Save Question</button>
+      <button class="btn-add" onclick="resetForm()" style="background:transparent;border:1px solid rgba(232,200,122,0.3);color:var(--crema);box-shadow:none;">✕ Cancel</button>
+      <input type="hidden" id="edit-id" value="">
+    </div>
+  </div>
+
+  <!-- QUESTIONS LIST -->
+  <div class="glass">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="section-title" style="margin:0">📋 All Questions</div>
+      <span class="q-count" id="q-count">Loading…</span>
+    </div>
+    <div class="filter-row" id="filter-row">
+      <button class="filter-btn active" onclick="filterCat('all', this)">All</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="q-table" id="q-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Question</th>
+            <th>A</th><th>B</th><th>C</th><th>D</th>
+            <th>✓</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="q-tbody">
+          <tr><td colspan="9" style="text-align:center;color:rgba(255,248,240,0.3);padding:2rem;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let allQuestions = [];
+let selectedCorrect = '';
+let currentFilter = 'all';
+let editMode = false;
+
+function setCorrect(letter) {
+  selectedCorrect = letter;
+  ['A','B','C','D'].forEach(l => {
+    document.getElementById(`co-${l}`).className = 'correct-opt' + (l === letter ? ` active-${l}` : '');
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function loadQuestions() {
+  const res = await fetch('/api/questions');
+  allQuestions = await res.json();
+  renderTable();
+  renderFilters();
+  document.getElementById('q-count').textContent = `${allQuestions.length} questions`;
+}
+
+function renderFilters() {
+  const cats = ['all', ...new Set(allQuestions.map(q => q.category))];
+  const row = document.getElementById('filter-row');
+  row.innerHTML = cats.map(c => `
+    <button class="filter-btn ${c === currentFilter ? 'active' : ''}" onclick="filterCat('${c}', this)">
+      ${c === 'all' ? 'All' : c}
+    </button>
+  `).join('');
+}
+
+function filterCat(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const filtered = currentFilter === 'all' ? allQuestions : allQuestions.filter(q => q.category === currentFilter);
+  const tbody = document.getElementById('q-tbody');
+  
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:rgba(255,248,240,0.3);padding:2rem;">No questions found</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = filtered.map((q, i) => `
+    <tr>
+      <td style="color:rgba(255,248,240,0.3);font-size:0.8rem;">${q.id}</td>
+      <td class="q-text-cell">${q.question}</td>
+      <td style="font-size:0.8rem;color:rgba(255,248,240,0.6);max-width:100px;">${q.option_a}</td>
+      <td style="font-size:0.8rem;color:rgba(255,248,240,0.6);max-width:100px;">${q.option_b}</td>
+      <td style="font-size:0.8rem;color:rgba(255,248,240,0.6);max-width:100px;">${q.option_c}</td>
+      <td style="font-size:0.8rem;color:rgba(255,248,240,0.6);max-width:100px;">${q.option_d}</td>
+      <td class="q-answer-cell ${q.correct_answer}">${q.correct_answer}</td>
+      <td><span class="cat-badge">${q.category}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-edit" onclick="editQ(${q.id})">✏️ Edit</button>
+          <button class="btn-del" onclick="deleteQ(${q.id})">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function editQ(id) {
+  const q = allQuestions.find(x => x.id === id);
+  if (!q) return;
+  
+  document.getElementById('f-question').value = q.question;
+  document.getElementById('f-a').value = q.option_a;
+  document.getElementById('f-b').value = q.option_b;
+  document.getElementById('f-c').value = q.option_c;
+  document.getElementById('f-d').value = q.option_d;
+  document.getElementById('f-cat').value = q.category;
+  document.getElementById('edit-id').value = id;
+  setCorrect(q.correct_answer);
+  document.getElementById('form-title').textContent = `✏️ Editing Question #${id}`;
+  document.getElementById('submit-btn').textContent = '💾 Update Question';
+  editMode = true;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function deleteQ(id) {
+  if (!confirm('Delete this question?')) return;
+  await fetch(`/api/questions/${id}`, {method:'DELETE'});
+  showToast('Question deleted ✓');
+  loadQuestions();
+}
+
+async function submitQuestion() {
+  const q = document.getElementById('f-question').value.trim();
+  const a = document.getElementById('f-a').value.trim();
+  const b = document.getElementById('f-b').value.trim();
+  const c = document.getElementById('f-c').value.trim();
+  const d = document.getElementById('f-d').value.trim();
+  const cat = document.getElementById('f-cat').value;
+  
+  if (!q || !a || !b || !c || !d || !selectedCorrect) {
+    showToast('⚠️ Please fill in all fields and select the correct answer');
+    return;
+  }
+  
+  const payload = { question:q, option_a:a, option_b:b, option_c:c, option_d:d, correct_answer:selectedCorrect, category:cat };
+  const editId = document.getElementById('edit-id').value;
+  
+  if (editId) {
+    await fetch(`/api/questions/${editId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    showToast('Question updated ✓');
+  } else {
+    await fetch('/api/questions', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    showToast('Question added ✓');
+  }
+  
+  resetForm();
+  loadQuestions();
+}
+
+function resetForm() {
+  ['f-question','f-a','f-b','f-c','f-d'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-cat').value = 'General';
+  selectedCorrect = '';
+  ['A','B','C','D'].forEach(l => document.getElementById(`co-${l}`).className = 'correct-opt');
+  document.getElementById('form-title').textContent = '➕ Add New Question';
+  document.getElementById('submit-btn').textContent = '☕ Save Question';
+  editMode = false;
+}
+
+loadQuestions();
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expresso — Quiz Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --espresso: #1a0a00;
+  --dark-roast: #2d1200;
+  --medium-roast: #5c2d0a;
+  --crema: #e8c87a;
+  --milk-foam: #fff8f0;
+  --steam: #f5e6ce;
+  --gold: #d4a843;
+  --white: #ffffff;
+  --red-answer: #e84343;
+  --blue-answer: #4361ee;
+  --yellow-answer: #f4a261;
+  --green-answer: #2dc653;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--espresso);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+.bg-pattern {
+  position: fixed; inset:0;
+  background: 
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(92,45,10,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 80% 80%, rgba(212,168,67,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(45,18,0,0.8) 0%, transparent 80%);
+  pointer-events:none;
+}
+.steam-container {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:400px; height:300px; pointer-events:none;
+  overflow:hidden;
+}
+.steam-line {
+  position:absolute; bottom:0; width:3px; border-radius:50%;
+  background: linear-gradient(to top, rgba(232,200,122,0.3), transparent);
+  animation: rise 3s ease-in infinite;
+}
+.steam-line:nth-child(1) { left:30%; height:200px; animation-delay:0s; animation-duration:3s; }
+.steam-line:nth-child(2) { left:50%; height:250px; animation-delay:0.8s; animation-duration:4s; }
+.steam-line:nth-child(3) { left:70%; height:180px; animation-delay:1.5s; animation-duration:3.5s; }
+@keyframes rise {
+  0% { opacity:0; transform:translateY(0) scaleX(1); }
+  20% { opacity:1; }
+  100% { opacity:0; transform:translateY(-200px) scaleX(3); }
+}
+
+.hero {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:100vh; position:relative; z-index:2; padding:2rem;
+  text-align:center;
+}
+
+.logo-mark {
+  width:90px; height:90px; border-radius:50%;
+  background: linear-gradient(135deg, var(--gold), var(--crema));
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.5rem; margin-bottom:1.5rem;
+  box-shadow: 0 0 60px rgba(212,168,67,0.4);
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 30px rgba(212,168,67,0.3); }
+  to   { box-shadow: 0 0 80px rgba(212,168,67,0.6); }
+}
+
+h1.brand {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.5rem, 10vw, 6rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--crema) 0%, var(--gold) 50%, var(--crema) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.tagline {
+  color: rgba(232,200,122,0.7);
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+}
+.nav-cards {
+  display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;
+  max-width: 700px;
+}
+.nav-card {
+  background: rgba(255,248,240,0.05);
+  border: 1px solid rgba(232,200,122,0.2);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: var(--milk-foam);
+  flex: 1; min-width: 180px;
+  backdrop-filter: blur(10px);
+}
+.nav-card:hover {
+  background: rgba(232,200,122,0.12);
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(212,168,67,0.2);
+}
+.nav-card .card-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.nav-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--crema); margin-bottom: 0.4rem;
+}
+.nav-card p { font-size: 0.85rem; color: rgba(255,248,240,0.6); font-weight: 300; }
+
+.cup-decoration {
+  position: fixed; right: -60px; bottom: -40px;
+  font-size: 18rem; opacity: 0.03; user-select:none;
+  transform: rotate(-15deg);
+}
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="steam-container">
+  <div class="steam-line"></div>
+  <div class="steam-line"></div>
+  <div class="steam-line"></div>
+</div>
+<div class="cup-decoration">☕</div>
+
+<div class="hero">
+  <div class="logo-mark">☕</div>
+  <h1 class="brand">Expresso</h1>
+  <p class="tagline">The Quiz Game with a Kick</p>
+  
+  <div class="nav-cards">
+    <a href="/host" class="nav-card">
+      <div class="card-icon">🎮</div>
+      <h3>Host Game</h3>
+      <p>Create a game & invite players</p>
+    </a>
+    <a href="/play" class="nav-card">
+      <div class="card-icon">🙋</div>
+      <h3>Join Game</h3>
+      <p>Enter a room code to play</p>
+    </a>
+    <a href="/admin" class="nav-card">
+      <div class="card-icon">⚙️</div>
+      <h3>Manage Questions</h3>
+      <p>Add, edit & organise questions</p>
+    </a>
+  </div>
+</div>
+</body>
+</html>
